@@ -63,10 +63,11 @@ workflows:
   version: 2
   ng-nhjs:
     jobs:
-      - build:
+      - build
       - deploy:
           requires:
             - build
           filters:
             tags:
               only: /^v.*/
+
