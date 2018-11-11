@@ -63,7 +63,10 @@ workflows:
   version: 2
   ng-nhjs:
     jobs:
-      - build
+      - build:
+          filters:  # required since `deploy` has tag filters AND requires `build`
+            tags:
+              only: /.*/
       - deploy:
           requires:
             - build
