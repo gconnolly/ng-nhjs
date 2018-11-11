@@ -57,17 +57,16 @@ jobs:
 
       - run:
           name: Deploy to S3
-          command: aws s3 cp ~/repo/dist s3://ng-nhjs/${CIRCLE_SHA1}/
+          command: aws s3 cp ~/repo/dist s3://ng-nhjs-repo/${CIRCLE_TAG}/ --recursive
 
 workflows:
   version: 2
   ng-nhjs:
     jobs:
       - build:
-          filters:
-            branches:
-              only:
-                - master
       - deploy:
           requires:
             - build
+          filters:
+            tags:
+              only: /^v.*/
