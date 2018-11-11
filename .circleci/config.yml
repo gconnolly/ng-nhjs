@@ -6,13 +6,7 @@ version: 2
 jobs:
   build:
     docker:
-      # specify the version you desire here
       - image: circleci/node:8
-      
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/mongo:3.4.4
 
     working_directory: ~/repo
 
@@ -34,3 +28,38 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
         
       - run: npm run build-prod
+
+      - save_cache:
+          key: ng-nhjs-{{ checksum ".circle-sha" }}-{{ arch }}
+          paths:
+            - ~/repo/dist
+
+  deploy:
+    docker:
+      - image: circleci/python:3.7
+    working_directory: ~/repo
+    steps:
+      - run:
+          name: Install awscli
+          command: sudo pip install awscli
+
+      - restore_cache:
+          keys:
+            - ng-nhjs-{{ checksum ".circle-sha" }}-{{ arch }}
+
+      - run:
+          name: Deploy to S3
+          command: aws s3 cp ~/repo/dist s3://ng-nhjs/${CIRCLE_SHA1}/
+
+workflows:
+  version: 2
+  ng-nhjs:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only:
+                - master
+      - deploy:
+          requires:
+            - build
