@@ -57,22 +57,17 @@ jobs:
 
       - run:
           name: Deploy to S3
-          command: aws s3 cp ~/repo/dist s3://ng-nhjs-repo/${CIRCLE_TAG}/ --recursive
+          command: aws s3 sync ~/repo/dist s3://ng-nhjs --delete
 
 workflows:
   version: 2
   ng-nhjs:
     jobs:
       - build:
-          filters:  # required since `deploy` has tag filters AND requires `build`
-            tags:
-              only: /^v.*/
+          filters:
+            branches:
+              only:
+                - master
       - deploy:
           requires:
             - build
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              ignore: /.*/
-
